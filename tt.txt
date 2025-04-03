@@ -1,0 +1,49 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20}
+	numGoroutines := 3
+	wg := sync.WaitGroup{}
+	codeCh := make(chan int)
+	summa := 0
+	for _, v := range arr {
+		summa += v
+	}
+	fmt.Println("Sum of all elements in the array1:", summa)
+	wg.Add(numGoroutines)
+	go func() {
+		summarration(arr[:len(arr)/numGoroutines], codeCh)
+		wg.Done()
+	}()
+	go func() {
+		summarration(arr[len(arr)/numGoroutines:len(arr)/numGoroutines*2], codeCh)
+		wg.Done()
+	}()
+	go func() {
+		summarration(arr[len(arr)/numGoroutines*2:], codeCh)
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Wait()
+		close(codeCh)
+	}()
+	result := 0
+	for sum := range codeCh {
+		result += sum
+	}
+	fmt.Println("Sum of all elements in the array:", result)
+}
+
+func summarration(massive []int, canal chan int) {
+	sum := 0
+	for _, v := range massive {
+		sum += v
+	}
+	canal <- sum
+}
