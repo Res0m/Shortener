@@ -1,8 +1,9 @@
 package main
 
 import (
+	// "GolangAdvanced/configs"
 	"GolangAdvanced/configs"
-	"GolangAdvanced/internal/hello"
+	"GolangAdvanced/internal/auth"
 	"fmt"
 	"net/http"
 )
@@ -10,7 +11,11 @@ import (
 func main() {
 	conf := configs.LoadConfig()
 	router := http.NewServeMux()
-	hello.NewHelloHandler(router)
+	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
+		Config: conf,
+	})
+	// /auth/login
+	// /auth/registration
 
 	server := http.Server{
 		Addr:    ":8081",
