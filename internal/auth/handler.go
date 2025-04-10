@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
+	"net/mail"
 )
 
 type AuthHandlerDeps struct {
@@ -40,11 +40,16 @@ func (login *AuthHandler) Login() http.HandlerFunc {
 			res.JsonRes(w, "Email required", 402)
 			return
 		}
-		match, _ := regexp.MatchString(`[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}`,payload.Email)
-		if match{
-			res.JsonRes(w, "Wrong Email", 402)
+		_, err = mail.ParseAddress(payload.Email)
+		if err != nil {
+			res.JsonRes(w, "Wrond Email", 402)
 			return
 		}
+		// match, _ := regexp.MatchString(`[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}`,payload.Email)
+		// if match{
+		// 	res.JsonRes(w, "Wrong Email", 402)
+		// 	return
+		// }
 		if payload.Password == "" {
 			res.JsonRes(w, "Password required", 402)
 			return
