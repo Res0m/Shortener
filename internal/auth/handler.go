@@ -2,12 +2,10 @@ package auth
 
 import (
 	"GolangAdvanced/configs"
+	"GolangAdvanced/pkg/request"
 	res "GolangAdvanced/pkg/response"
-	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandlerDeps struct {
@@ -28,22 +26,11 @@ func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
 
 func (login *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println(login.Config.Auth.Secret)
-		fmt.Println("Login")
-		//Прочитать Body
-		var payload LoginRequest
-		err := json.NewDecoder(req.Body).Decode(&payload)
+		body, err := request.HandleBody[LoginRequest](&w, req)
 		if err != nil {
-			res.JsonRes(w, err.Error(), 402)
 			return
 		}
-		validate := validator.New()
-		err = validate.Struct(payload)
-		if err != nil {
-			res.JsonRes(w, err.Error(), 402)
-			return
-		}
-		fmt.Println(payload)
+		fmt.Println(body)
 		data := LoginResponse{
 			Token: "123",
 		}
@@ -54,5 +41,6 @@ func (login *AuthHandler) Login() http.HandlerFunc {
 func (reg *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Register")
+		data := LoginResponse{}
 	}
 }
