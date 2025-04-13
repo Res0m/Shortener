@@ -4,7 +4,7 @@ services:
     image: postgres:17.2
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: my_pass
+      POSTGRES_PASSWORD: 1402
       PGDATA: /data/postgres
     volumes:
       - ./postgres-data:/data/postgres
