@@ -4,12 +4,14 @@ import (
 	// "GolangAdvanced/configs"
 	"GolangAdvanced/configs"
 	"GolangAdvanced/internal/auth"
+	"GolangAdvanced/pkg/db"
 	"fmt"
 	"net/http"
 )
 
 func main() {
 	conf := configs.LoadConfig()
+	_ = db.NewDb(conf)
 	router := http.NewServeMux()
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config: conf,
