@@ -40,7 +40,10 @@ func (login *AuthHandler) Login() http.HandlerFunc {
 
 func (reg *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("Register")
-		data := LoginResponse{}
+		body, err := request.HandleBody[RegisterRequest](&w, req)
+		if err != nil {
+			return
+		}
+		fmt.Println(body)
 	}
 }
