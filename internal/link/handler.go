@@ -1,8 +1,8 @@
 package link
 
 import (
-	res "GolangAdvanced/pkg/response"
 	req "GolangAdvanced/pkg/request"
+	res "GolangAdvanced/pkg/response"
 	"fmt"
 	"net/http"
 )
@@ -42,7 +42,13 @@ func (handler *LinkHandler) Create() http.HandlerFunc {
 }
 func (handler *LinkHandler) GoTo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		hash := r.PathValue("hash")
+		link, err := handler.LinkRepository.GetByHash(hash)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Redirect(w, r, link.Url, http.StatusTemporaryRedirect)
 	}
 }
 func (handler *LinkHandler) Update() http.HandlerFunc {
