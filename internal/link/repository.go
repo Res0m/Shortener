@@ -1,6 +1,10 @@
 package link
 
-import "GolangAdvanced/pkg/db"
+import (
+	"GolangAdvanced/pkg/db"
+
+	"gorm.io/gorm/clause"
+)
 
 type LinkRepository struct {
 	DataBase *db.Db
@@ -31,4 +35,12 @@ func (repo *LinkRepository) GetByHash(hash string) (*Link, error) {
 		return nil, result.Error
 	}
 	return &link, nil
+}
+
+func (repo *LinkRepository) Update(link *Link) (*Link, error) {
+	result := repo.DataBase.DB.Clauses(clause.Returning{}).Updates(link)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return link, nil
 }
