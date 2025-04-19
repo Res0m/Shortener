@@ -4,6 +4,7 @@ import (
 	// "GolangAdvanced/configs"
 	"GolangAdvanced/configs"
 	"GolangAdvanced/internal/auth"
+	"GolangAdvanced/internal/link"
 	"GolangAdvanced/pkg/db"
 	"fmt"
 	"net/http"
@@ -11,13 +12,20 @@ import (
 
 func main() {
 	conf := configs.LoadConfig()
-	_ = db.NewDb(conf)
+	db := db.NewDb(conf)
 	router := http.NewServeMux()
+
+	//Repositories
+	linkRepository := link.NewLinkRepository(db)
+
+	//Handler
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config: conf,
 	})
-	// /auth/login
-	// /auth/registration
+
+	link.NewLinkHandler(router, &link.LinkHandlerDeps{
+		LinkRepository: linkRepository,
+	})
 
 	server := http.Server{
 		Addr:    ":8081",
