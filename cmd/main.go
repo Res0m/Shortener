@@ -5,6 +5,7 @@ import (
 	"GolangAdvanced/configs"
 	"GolangAdvanced/internal/auth"
 	"GolangAdvanced/internal/link"
+	"GolangAdvanced/internal/user"
 	"GolangAdvanced/pkg/db"
 	"fmt"
 	"net/http"
@@ -17,10 +18,15 @@ func main() {
 
 	//Repositories
 	linkRepository := link.NewLinkRepository(db)
+	userRepository := user.NewUserRepository(db)
+
+	//Services
+	authService := auth.NewAuthService(userRepository)
 
 	//Handler
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
-		Config: conf,
+		Config:      conf,
+		AuthService: authService,
 	})
 
 	link.NewLinkHandler(router, &link.LinkHandlerDeps{
