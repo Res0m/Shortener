@@ -82,7 +82,7 @@ func (handler *LinkHandler) Update() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		res.JsonRes(w, link, 200)
+		res.JsonRes(w, link, 201)
 	}
 }
 func (handler *LinkHandler) Delete() http.HandlerFunc {
