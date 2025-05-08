@@ -2,9 +2,9 @@ package auth
 
 import (
 	"GolangAdvanced/configs"
+	"GolangAdvanced/pkg/jwt"
 	"GolangAdvanced/pkg/request"
 	res "GolangAdvanced/pkg/response"
-	"fmt"
 	"net/http"
 )
 
@@ -27,15 +27,24 @@ func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
 	router.HandleFunc("POST /auth/register", handler.Register())
 }
 
-func (login *AuthHandler) Login() http.HandlerFunc {
+func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		body, err := request.HandleBody[LoginRequest](&w, req)
 		if err != nil {
 			return
 		}
-		fmt.Println(body)
+		email, err := handler.AuthService.Login(body.Email, body.Password)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		token, err := jwt.NewJWT(handler.Config.Auth.Secret).Create(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		data := LoginResponse{
-			Token: "123",
+			Token: token,
 		}
 		res.JsonRes(w, data, 200)
 	}
@@ -47,6 +56,19 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		handler.AuthService.Register(body.Email, body.Password, body.NickName)
+		email, err := handler.AuthService.Register(body.Email, body.Password, body.NickName)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		token, err := jwt.NewJWT(handler.Config.Auth.Secret).Create(email)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		data := RegisterResponse{
+			Token: token,
+		}
+		res.JsonRes(w, data, 200)
 	}
 }
