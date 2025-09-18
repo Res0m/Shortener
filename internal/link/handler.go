@@ -1,9 +1,11 @@
 package link
 
 import (
+	"GolangAdvanced/configs"
 	"GolangAdvanced/pkg/middleware"
 	req "GolangAdvanced/pkg/request"
 	res "GolangAdvanced/pkg/response"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,10 +14,12 @@ import (
 
 type LinkHandler struct {
 	LinkRepository *LinkRepository
+	Config         *configs.Config
 }
 
 type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository
+	Config         *configs.Config
 }
 
 func NewLinkHandler(router *http.ServeMux, deps *LinkHandlerDeps) {
@@ -24,7 +28,7 @@ func NewLinkHandler(router *http.ServeMux, deps *LinkHandlerDeps) {
 	}
 	router.HandleFunc("POST /link", handler.Create())
 	router.HandleFunc("GET /link/{hash}", handler.GoTo())
-	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update()))
+	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
 	router.HandleFunc("DELETE /link/{id}", handler.Delete())
 }
 
@@ -64,6 +68,10 @@ func (handler *LinkHandler) GoTo() http.HandlerFunc {
 }
 func (handler *LinkHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		email, ok := r.Context().Value(middleware.ContextEmailKey).(string)
+		if ok {
+			fmt.Println(email)
+		}
 		body, err := req.HandleBody[LinkUpdateRequest](&w, r)
 		if err != nil {
 			return
