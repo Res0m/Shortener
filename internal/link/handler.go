@@ -2,6 +2,7 @@ package link
 
 import (
 	"GolangAdvanced/configs"
+	"GolangAdvanced/pkg/event"
 	"GolangAdvanced/pkg/middleware"
 	req "GolangAdvanced/pkg/request"
 	res "GolangAdvanced/pkg/response"
@@ -14,17 +15,19 @@ import (
 
 type LinkHandler struct {
 	LinkRepository *LinkRepository
-	Config         *configs.Config
+	EventBus       *event.EventBus
 }
 
 type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository
 	Config         *configs.Config
+	EventBus       *event.EventBus
 }
 
-func NewLinkHandler(router *http.ServeMux, deps *LinkHandlerDeps) {
+func NewLinkHandler(router *http.ServeMux, deps LinkHandlerDeps) {
 	handler := &LinkHandler{
 		LinkRepository: deps.LinkRepository,
+		EventBus:       deps.EventBus,
 	}
 	router.HandleFunc("POST /link", handler.Create())
 	router.HandleFunc("GET /link/{hash}", handler.GoTo())
@@ -64,6 +67,10 @@ func (handler *LinkHandler) GoTo() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		go handler.EventBus.Publish(event.Event{
+			Type: event.EventLinkVisited,
+			Data: link.ID,
+		})
 		http.Redirect(w, r, link.Url, http.StatusTemporaryRedirect)
 	}
 }
