@@ -4,14 +4,14 @@ import (
 	"GolangAdvanced/configs"
 	"GolangAdvanced/pkg/event"
 	"GolangAdvanced/pkg/middleware"
-	"fmt"
+	res "GolangAdvanced/pkg/response"
 	"net/http"
 	"time"
 )
 
 const (
-	FilterByDay   = "day"
-	FilterByMonth = "month"
+	GroupByDay   = "day"
+	GroupByMonth = "month"
 )
 
 type StatHandler struct {
@@ -47,10 +47,11 @@ func (handler *StatHandler) GetStat() http.HandlerFunc {
 			return
 		}
 		by := r.URL.Query().Get("by")
-		if by != FilterByDay && by != FilterByMonth {
+		if by != GroupByDay && by != GroupByMonth {
 			http.Error(w, "Invalid by param", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(from, to, by)
+		stats := handler.StatRepository.GetStats(by, from, to)
+		res.JsonRes(w, stats, 200)
 	}
 }

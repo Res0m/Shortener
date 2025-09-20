@@ -46,7 +46,6 @@ func (repo *LinkRepository) Update(link *Link) (*Link, error) {
 
 }
 
-
 func (repo *LinkRepository) Delete(id uint) error {
 	result := repo.DataBase.DB.Delete(&Link{}, id)
 	if result.Error != nil {
@@ -55,8 +54,7 @@ func (repo *LinkRepository) Delete(id uint) error {
 	return nil
 }
 
-
-func (repo *LinkRepository) GetById(id uint) (*Link, error){
+func (repo *LinkRepository) GetById(id uint) (*Link, error) {
 	var link Link
 	result := repo.DataBase.DB.First(&link, id)
 	if result.Error != nil {
@@ -65,7 +63,7 @@ func (repo *LinkRepository) GetById(id uint) (*Link, error){
 	return &link, nil
 }
 
-func (repo *LinkRepository) Count() int64{
+func (repo *LinkRepository) Count() int64 {
 	var count int64
 	repo.DataBase.
 		Table("links").
@@ -74,8 +72,7 @@ func (repo *LinkRepository) Count() int64{
 	return count
 }
 func (repo *LinkRepository) GetAll(limit, offset int) []Link {
-	var links []Link 
-
+	var links []Link
 	repo.DataBase.
 		Table("links").
 		Where("deleted_at is null").
@@ -84,5 +81,5 @@ func (repo *LinkRepository) GetAll(limit, offset int) []Link {
 		Offset(offset).
 		Scan(&links)
 
-		return links
+	return links
 }
