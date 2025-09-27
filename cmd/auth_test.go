@@ -2,15 +2,50 @@ package main
 
 import (
 	"GolangAdvanced/internal/auth"
+	"GolangAdvanced/internal/user"
 	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
+func initDb() *gorm.DB {
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic(err)
+	}
+	db, err := gorm.Open(postgres.Open(os.Getenv("DSN")), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
+func removeData(db *gorm.DB){
+	db.Unscoped().
+	Where("email = ?", "a2@.ru").
+	Delete(&user.User{})
+}
+
+func initData(db *gorm.DB) {
+	db.Create(&user.User{
+		Email:    "a2@a.ru",
+		Password: "$2a$10$VcU7JMXreFTEuulfDWju8eWrnvpUpjJ/T2Yc1ZbG8gTYWfp8pZlCK",
+		Name:     "Вася",
+	})
+}
 func TestLoginSuccsess(t *testing.T) {
+	//Prepare
+	db := initDb()
+	initData(db)
+
 	ts := httptest.NewServer(App())
 	defer ts.Close()
 
@@ -40,10 +75,14 @@ func TestLoginSuccsess(t *testing.T) {
 	if resData.Token == "" {
 		t.Fatalf("Token empty")
 	}
+	removeData(db)
 }
 
-
 func TestLoginFail(t *testing.T) {
+	//Prepare
+	db := initDb()
+	initData(db)
+
 	ts := httptest.NewServer(App())
 	defer ts.Close()
 
@@ -60,4 +99,5 @@ func TestLoginFail(t *testing.T) {
 	if res.StatusCode != 401 {
 		t.Fatalf("Expected %d got %d", 401, res.StatusCode)
 	}
+	removeData(db)
 }

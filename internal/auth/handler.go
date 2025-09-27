@@ -19,7 +19,7 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
-	handler := AuthHandler{
+	handler := &AuthHandler{
 		Config:      deps.Config,
 		AuthService: deps.AuthService,
 	}
@@ -73,6 +73,6 @@ func (handler *AuthHandler) Register() http.HandlerFunc {
 		data := RegisterResponse{
 			Token: token,
 		}
-		res.JsonRes(w, data, 200)
+		res.JsonRes(w, data, 201)
 	}
 }

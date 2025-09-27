@@ -2,16 +2,17 @@ package auth
 
 import (
 	"GolangAdvanced/internal/user"
+	"GolangAdvanced/pkg/di"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	UserRepository *user.UserRepository
+	UserRepository di.IUserRepository
 }
 
-func NewAuthService(userRepository *user.UserRepository) *AuthService {
+func NewAuthService(userRepository di.IUserRepository) *AuthService {
 	return &AuthService{UserRepository: userRepository}
 }
 
@@ -26,20 +27,19 @@ func (service *AuthService) Register(email, password, name string) (string, erro
 	}
 
 	user := &user.User{
-		Email: email,
+		Email:    email,
 		Password: string(hashedPassword),
-		Name: name,
+		Name:     name,
 	}
 	_, err = service.UserRepository.Create(user)
 	if err != nil {
 		return "", err
 	}
 	return user.Email, nil
-	
+
 }
 
-
-func (service *AuthService) Login(email, password string) (string, error){
+func (service *AuthService) Login(email, password string) (string, error) {
 	existedUser, _ := service.UserRepository.FindByEmail(email)
 	if existedUser == nil {
 		return "", errors.New(ErrWrongCreadetials)
